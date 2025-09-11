@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Портал в  Мир Музаффара . i</title>
+    <title>Портал в  Мир Музаффара </title>
+
     <style>
         :root {
             --primary-color: #00ffc8;
@@ -29,12 +30,8 @@
         }
 
         @keyframes background-glow {
-            from {
-                filter: hue-rotate(0deg);
-            }
-            to {
-                filter: hue-rotate(360deg);
-            }
+            from { filter: hue-rotate(0deg); }
+            to { filter: hue-rotate(360deg); }
         }
 
         .container {
@@ -57,18 +54,36 @@
         }
 
         @keyframes text-glow {
-            from {
-                text-shadow: 0 0 5px var(--primary-color), 0 0 10px var(--primary-color);
-            }
-            to {
-                text-shadow: 0 0 15px var(--primary-color), 0 0 25px var(--primary-color);
-            }
+            from { text-shadow: 0 0 5px var(--primary-color), 0 0 10px var(--primary-color); }
+            to { text-shadow: 0 0 15px var(--primary-color), 0 0 25px var(--primary-color); }
         }
 
         .tagline {
             font-size: 1.2em;
             color: var(--secondary-color);
-            margin-bottom: 40px;
+            margin-bottom: 20px;
+        }
+
+        /* 🔍 Поисковик */
+        .search-box {
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            width: 80%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: var(--card-border);
+            background-color: rgba(20, 20, 40, 0.7);
+            color: #fff;
+            font-size: 1em;
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 255, 200, 0.3);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .search-input:focus {
+            box-shadow: 0 0 20px rgba(0, 255, 200, 0.6);
         }
 
         .project-grid {
@@ -133,19 +148,25 @@
             color: #555;
         }
     </style>
-    <meta name="google-site-verification" content="ZF9gGExrwA89vyBKFJhlpjQ5PuTVmeu347OHL6w0ODg" />
 </head>
 <body>
-<script async src="https://cse.google.com/cse.js?cx=f336129a14eb048db">
-</script>
-<div class="gcse-search"></div>
     <div class="container">
-        <h1>Портал в Мир Музаффара.ш</h1>
+        <h1>Портал в Мир Музаффара</h1>
         <p class="tagline">Исследуй все мои проекты в одном месте.</p>
 
-        <div class="project-grid">
+        <!-- 🔍 Поисковик -->
+        <div class="search-box">
+            <input type="text" id="search" class="search-input" placeholder="Поиск по сайтам...">
+        </div>
+
+        <div class="project-grid" id="projects">
+            <!-- 🔗 Твои карточки (оставил как есть) -->
             <a href="https://muzaffar699.github.io/Muzaffar-films-and-books/#gsc.tab=0" class="project-card">
                 <div class="card-title">Фильмы и книги</div>
+                <div class="card-description">Найди вдохновение и создай невероятные идеи для рисования.</div>
+            </a>
+            <a href="https://muzaffar699.github.io/1/" class="project-card">
+                <div class="card-title">тест на тип личьности</div>
                 <div class="card-description">Найди вдохновение и создай невероятные идеи для рисования.</div>
             </a>
             <a href="https://muzaffar699.github.io/MUZAFFAR-AI/" class="project-card">
@@ -164,14 +185,28 @@
                 <div class="card-title">Погода</div>
                 <div class="card-description">Смотри точную погоду в любых городах и странах.</div>
             </a>
-            <a href="https://muzaffar699.github.io/-mu/" class="project-card">
+            <a href="https://muzaffar699.github.io/MUZAFFAR-chat/" class="project-card">
+                <div class="card-title">Muzaffar чат</div>
+                <div class="card-description">переписываяся с родными и близкими.</div>
+            </a>
+            <a href="https://muzaffar699.github.io/vigilant-octo-waffle/" class="project-card">
+                <div class="card-title">карта</div>
+                <div class="card-description">найди любое место положение земли.</div>
+            </a>
+            <a href="https://muzaffar699.github.io/book/index.html" class="project-card">
                 <div class="card-title">Портал игр</div>
                 <div class="card-description">Играй и развивайся здесь.</div>
             </a>
-
-            <!-- 🔥 Новые 3 кнопки -->
             <a href="https://muzaffar699.github.io/html-editor/" class="project-card">
                 <div class="card-title">HTML Editor</div>
+                <div class="card-description">Описание нового проекта.</div>
+            </a>
+            <a href="https://muzaffar699.github.io/2/" class="project-card">
+                <div class="card-title">новости</div>
+                <div class="card-description">Описание нового проекта.</div>
+            </a>
+            <a href="https://muzaffar699.github.io/3/" class="project-card">
+                <div class="card-title">МУЗЫКА</div>
                 <div class="card-description">Описание нового проекта.</div>
             </a>
             <a href="https://muzaffar699.github.io/-ywbrkjgtlbz/" class="project-card">
@@ -185,13 +220,26 @@
         </div>
 
         <footer>
-            основатель Шарипов Музаффар Анваровичь  © 2025
+            Основатель Шарипов Музаффар Анваровичь © 2025    | <a href="https://muzaffar699.github.io/4/" style="color:#555; text-decoration:none;">Онас</a>
         </footer>
     </div>
 
+    <script>
+        const searchInput = document.getElementById('search');
+        const projects = document.querySelectorAll('.project-card');
+
+        searchInput.addEventListener('input', () => {
+            const value = searchInput.value.toLowerCase();
+            projects.forEach(card => {
+                const title = card.querySelector('.card-title').textContent.toLowerCase();
+                const desc = card.querySelector('.card-description').textContent.toLowerCase();
+                if (title.includes(value) || desc.includes(value)) {
+                    card.style.display = "block";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        });
+    </script>
 </body>
 </html>
-
-
-
-
