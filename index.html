@@ -1,264 +1,262 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAWORLD </title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <style>
-        :root {
-            --primary-color: #00ffc8;
-            --secondary-color: #00aaff;
-            --bg-color: #0d0d1a;
-            --card-bg: rgba(20, 20, 40, 0.5);
-            --card-border: 1px solid rgba(0, 255, 200, 0.2);
-        }
+  <title>MAWORLD — проекты Музаффара | Веб-разработка, AI, музыка, игры и многое другое</title>
 
-        body {
-            font-family: 'Orbitron', sans-serif;
-            background-color: var(--bg-color);
-            color: #ffffff;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-            background: linear-gradient(45deg, var(--bg-color) 0%, #1a0d1a 100%);
-            animation: background-glow 20s infinite alternate ease-in-out;
-        }
+  <meta name="description" content="Открой все проекты Музаффара: AI-боты, музыка, веб-приложения, игры, словарь, чат, погода и многое другое. MAWORLD — место, где технологии встречаются с креативом.">
+  <meta name="keywords" content="Muzaffar, MAWORLD, проекты, веб-разработка, JavaScript, AI, музыка, игры, чат, погода, словарь, GitHub Pages">
+  <meta name="author" content="Sharipov Muzaffar Anvarovich">
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow">
 
-        @keyframes background-glow {
-            from { filter: hue-rotate(0deg); }
-            to { filter: hue-rotate(360deg); }
-        }
+  <!-- Open Graph / соцсети -->
+  <meta property="og:title" content="MAWORLD — проекты Музаффара">
+  <meta property="og:description" content="Все мои проекты в одном месте — от AI до игр.">
+  <meta property="og:type" content="website">
+  <meta property "og:url" content="https://muzaffar699.github.io/">
+  <!-- здесь вставь URL картинки-превью -->
+  <meta property="og:image" content="https://i.ibb.co/…/имя_картинки.png">
 
-        .container {
-            width: 100%;
-            max-width: 1000px;
-            text-align: center;
-            padding: 30px;
-            background-color: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 0 30px rgba(0, 255, 200, 0.2);
-        }
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MAWORLD — проекты Музаффара">
+  <meta name="twitter:description" content="Исследуй все мои проекты в одном месте.">
+  <meta name="twitter:image" content="https://i.ibb.co/…/имя_картинки.png">
 
-        h1 {
-            font-size: 3em;
-            color: var(--primary-color);
-            text-shadow: 0 0 10px var(--primary-color);
-            margin-bottom: 10px;
-            animation: text-glow 2s infinite alternate;
-        }
+  <!-- Если у тебя уже добавлен google-site-verification, можно оставить -->
+  <meta name="google-site-verification" content="ZF9gGExrwA89vyBKFJhlpjQ5PuTVmeu347OHL6w0ODg" />
 
-        @keyframes text-glow {
-            from { text-shadow: 0 0 5px var(--primary-color), 0 0 10px var(--primary-color); }
-            to { text-shadow: 0 0 15px var(--primary-color), 0 0 25px var(--primary-color); }
-        }
-
-        .tagline {
-            font-size: 1.2em;
-            color: var(--secondary-color);
-            margin-bottom: 20px;
-        }
-
-        /* 🔍 Поисковик */
-        .search-box {
-            margin-bottom: 30px;
-        }
-
-        .search-input {
-            width: 80%;
-            padding: 12px 15px;
-            border-radius: 10px;
-            border: var(--card-border);
-            background-color: rgba(20, 20, 40, 0.7);
-            color: #fff;
-            font-size: 1em;
-            outline: none;
-            box-shadow: 0 0 10px rgba(0, 255, 200, 0.3);
-            transition: box-shadow 0.3s ease;
-        }
-
-        .search-input:focus {
-            box-shadow: 0 0 20px rgba(0, 255, 200, 0.6);
-        }
-
-        .project-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .project-card {
-            background-color: var(--card-bg);
-            border: var(--card-border);
-            border-radius: 15px;
-            padding: 25px;
-            text-decoration: none;
-            color: #ffffff;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        .project-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, var(--primary-color) 0%, transparent 60%);
-            opacity: 0;
-            transform: scale(0.5);
-            transition: opacity 0.4s ease, transform 0.4s ease;
-            z-index: -1;
-        }
-
-        .project-card:hover {
-            transform: translateY(-10px) scale(1.03);
-            box-shadow: 0 10px 20px rgba(0, 255, 200, 0.4);
-            background-color: rgba(20, 20, 40, 0.8);
-        }
-
-        .project-card:hover::before {
-            opacity: 0.5;
-            transform: scale(1);
-        }
-
-        .card-title {
-            font-size: 1.5em;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--primary-color);
-        }
-
-        .card-description {
-            font-size: 0.9em;
-            color: #ccc;
-        }
-
-        footer {
-            margin-top: 50px;
-            font-size: 0.8em;
-            color: #555;
-        }
-    </style>
-    <meta name="google-site-verification" content="ZF9gGExrwA89vyBKFJhlpjQ5PuTVmeu347OHL6w0ODg" />
+  <style>
+    :root {
+      --primary-color: #00ffc8;
+      --secondary-color: #00aaff;
+      --bg-color: #0d0d1a;
+      --card-bg: rgba(20, 20, 40, 0.5);
+      --card-border: 1px solid rgba(0, 255, 200, 0.2);
+    }
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background-color: var(--bg-color);
+      color: #ffffff;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+      background: linear-gradient(45deg, var(--bg-color) 0%, #1a0d1a 100%);
+      animation: background-glow 20s infinite alternate ease-in-out;
+    }
+    @keyframes background-glow {
+      from { filter: hue-rotate(0deg); }
+      to { filter: hue-rotate(360deg); }
+    }
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      text-align: center;
+      padding: 30px;
+      background-color: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 255, 200, 0.2);
+    }
+    h1 {
+      font-size: 3em;
+      color: var(--primary-color);
+      text-shadow: 0 0 10px var(--primary-color);
+      margin-bottom: 10px;
+      animation: text-glow 2s infinite alternate;
+    }
+    @keyframes text-glow {
+      from { text-shadow: 0 0 5px var(--primary-color), 0 0 10px var(--primary-color); }
+      to { text-shadow: 0 0 15px var(--primary-color), 0 0 25px var(--primary-color); }
+    }
+    .tagline {
+      font-size: 1.2em;
+      color: var(--secondary-color);
+      margin-bottom: 20px;
+    }
+    .search-box {
+      margin-bottom: 30px;
+    }
+    .search-input {
+      width: 80%;
+      padding: 12px 15px;
+      border-radius: 10px;
+      border: var(--card-border);
+      background-color: rgba(20, 20, 40, 0.7);
+      color: #fff;
+      font-size: 1em;
+      outline: none;
+      box-shadow: 0 0 10px rgba(0, 255, 200, 0.3);
+      transition: box-shadow 0.3s ease;
+    }
+    .search-input:focus {
+      box-shadow: 0 0 20px rgba(0, 255, 200, 0.6);
+    }
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .project-card {
+      background-color: var(--card-bg);
+      border: var(--card-border);
+      border-radius: 15px;
+      padding: 25px;
+      text-decoration: none;
+      color: #ffffff;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, var(--primary-color) 0%, transparent 60%);
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      z-index: -1;
+    }
+    .project-card:hover {
+      transform: translateY(-10px) scale(1.03);
+      box-shadow: 0 10px 20px rgba(0, 255, 200, 0.4);
+      background-color: rgba(20, 20, 40, 0.8);
+    }
+    .project-card:hover::before {
+      opacity: 0.5;
+      transform: scale(1);
+    }
+    .card-title {
+      font-size: 1.5em;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+    .card-description {
+      font-size: 0.9em;
+      color: #ccc;
+    }
+    footer {
+      margin-top: 50px;
+      font-size: 0.8em;
+      color: #555;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>MUZAFFARWORLD</h1>
-        <p class="tagline">Исследуй все мои проекты в одном месте.</p>
+  <div class="container">
+    <h1>MAWORLD</h1>
+    <p class="tagline">Исследуй все мои проекты в одном месте.</p>
 
-        <!-- 🔍 Поисковик -->
-        <div class="search-box">
-            <input type="text" id="search" class="search-input" placeholder="Поиск по сайтам...">
-        </div>
-
-        <div class="project-grid" id="projects">
-            <!-- 🔗 Твои карточки (оставил как есть) -->
-            <a href="https://muzaffar699.github.io/Muzaffar-films-and-books/#gsc.tab=0" class="project-card">
-                <div class="card-title">Фильмы и книги</div>
-                <div class="card-description">Найди вдохновение и создай невероятные идеи для рисования.</div>
-            </a>
-            <a href="https://muzaffar699.github.io/1/" class="project-card">
-                <div class="card-title">тест на тип личьности</div>
-                <div class="card-description">Найди вдохновение и создай невероятные идеи для рисования.</div>
-            </a>
-            <a href="https://muzaffar699.github.io/MUZAFFAR-AI/" class="project-card">
-                <div class="card-title">Словарь</div>
-                <div class="card-description">Создавай картинки с помощью ИИ из обычного текста.</div>
-            </a>
-            <a href="https://muzaffar699.github.io/-/" class="project-card">
-                <div class="card-title">Браузер</div>
-                <div class="card-description">Описание твоего нового крутого проекта.</div>
-            </a>
-            <a href="https://muzaffar699.github.io/-1/" class="project-card">
-                <div class="card-title">Конвертер валют</div>
-                <div class="card-description">Начни свой путь к успеху, выращивая полезные привычки.</div>
-            </a>
-            <a href="https://muzaffar699.github.io/M/" class="project-card">
-                <div class="card-title">Музаффар hub</div>
-                <div class="card-description">загружай и делись своими проектами</div>
-            </a>
-            
-            <a href="https://muzaffar699.github.io/-MUZAFFARA/" class="project-card">
-                <div class="card-title">Погода</div>
-                <div class="card-description">Смотри точную погоду в любых городах и странах.</div>
-            </a>
-            <a href="https://muzaffar699.github.io/MUZAFFAR-chat/" class="project-card">
-                <div class="card-title">Muzaffar чат</div>
-                <div class="card-description">переписываяся с родными и близкими.</div>
-            </a>
-            <a href="https://muzaffar699.github.io/vigilant-octo-waffle/" class="project-card">
-                <div class="card-title">карта</div>
-                <div class="card-description">найди любое место положение земли.</div>
-            </a>
-            <a href="https://muzaffar699.github.io/book/index.html" class="project-card">
-                <div class="card-title">Портал игр</div>
-                <div class="card-description">Играй и развивайся здесь.</div>
-            </a>
-            <a href="https://muzaffar699.github.io/html-editor/" class="project-card">
-                <div class="card-title">HTML Editor</div>
-                <div class="card-description">програмируй с нами быстро и легко.</div>
-            </a>
-            <a href="https://muzaffar699.github.io/os/" class="project-card">
-                <div class="card-title">MUZAFFAR OS</div>
-                <div class="card-description">самый лучший ос работай через нас</div>
-            </a>
-            <a href="https://muzaffar699.github.io/2/" class="project-card">
-                <div class="card-title">новости</div>
-                <div class="card-description">новые новости каждые 10 минут.</div>
-            </a>
-            <a href="https://muzaffar699.github.io/3/" class="project-card">
-                <div class="card-title">МУЗЫКА</div>
-                <div class="card-description">слушай музыку с нами.</div>
-            </a>
-            <a href="https://muzaffar699.github.io/-ywbrkjgtlbz/" class="project-card">
-                <div class="card-title">энциклопедия</div>
-                <div class="card-description">находи инфуо любой теме .</div>
-            </a>
-              <a href="https://share.character.ai/Wv9R/tbxe6z7n" class="project-card">
-                <div class="card-title">MUZAFFAR AI</div>
-                <div class="card-description">находи инфуо любой теме .</div>
-            </a>
-            <a href="https://muzaffar699.github.io/-muzaffa/" class="project-card">
-                <div class="card-title">обо мне</div>
-                <div class="card-description">Описание нового проекта.</div>
-            </a>
-        </div>
-
-        <footer>
-            Основатель Шарипов Музаффар Анварович © 2025    | <a href="https://muzaffar699.github.io/4/" style="color:#555; text-decoration:none;">О нас</a>
-        </footer>
+    <div class="search-box">
+      <input type="text" id="search" class="search-input" placeholder="Поиск по сайтам...">
     </div>
 
-    <script>
-        const searchInput = document.getElementById('search');
-        const projects = document.querySelectorAll('.project-card');
+    <div class="project-grid" id="projects">
+      <!-- Вот твои карточки -->
+      <a href="https://muzaffar699.github.io/Muzaffar-films-and-books/#gsc.tab=0" class="project-card">
+        <div class="card-title">Фильмы и книги</div>
+        <div class="card-description">смотри и развивайся.</div>
+      </a>
+      <a href="https://muzaffar699.github.io/1/" class="project-card">
+        <div class="card-title">тест на тип личности</div>
+        <div class="card-description">Найди вдохновение и создай невероятные идеи для рисования.</div>
+      </a>
+<a href="https://muzaffar699.github.io/9/" class="project-card">
+        <div class="card-title">video</div>
+        <div class="card-description">смотри и опубликовывай видео.</div>
+      </a>
+      <a href="https://muzaffar699.github.io/MUZAFFAR-AI/" class="project-card">
+        <div class="card-title">Словарь</div>
+        <div class="card-description">Создавай картинки с помощью ИИ из обычного текста.</div>
+      </a>
+      <a href="https://muzaffar699.github.io/-/" class="project-card">
+        <div class="card-title">Браузер</div>
+        <div class="card-description">браузер </div>
+      </a>
+      <a href="https://muzaffar699.github.io/-1/" class="project-card">
+        <div class="card-title">Конвертер валют</div>
+        <div class="card-description">Начни свой путь к успеху, выращивая полезные привычки.</div>
+      </a>
+      <a href="https://muzaffar699.github.io/M/" class="project-card">
+        <div class="card-title">Музаффар hub</div>
+        <div class="card-description">загружай и делись своими проектами</div>
+      </a>
+      <a href="https://muzaffar699.github.io/-MUZAFFARA/" class="project-card">
+        <div class="card-title">Погода</div>
+        <div class="card-description">Смотри точную погоду в любых городах и странах.</div>
+      </a>
+      <a href="https://muzaffar699.github.io/MUZAFFAR-chat/" class="project-card">
+        <div class="card-title">Muzaffar чат</div>
+        <div class="card-description">переписываясь с родными и близкими.</div>
+      </a>
+      <a href="https://muzaffar699.github.io/vigilant-octo-waffle/" class="project-card">
+        <div class="card-title">карта</div>
+        <div class="card-description">найди любое место положение земли.</div>
+      </a>
+      <a href="https://muzaffar699.github.io/book/index.html" class="project-card">
+        <div class="card-title">Портал игр</div>
+        <div class="card-description">Играй и развивайся здесь.</div>
+      </a>
+      <a href="https://muzaffar699.github.io/html-editor/" class="project-card">
+        <div class="card-title">HTML Editor</div>
+        <div class="card-description">програмируй с нами быстро и легко.</div>
+      </a>
+      <a href="https://muzaffar699.github.io/os/" class="project-card">
+        <div class="card-title">MUZAFFAR OS</div>
+        <div class="card-description">самая лучшая ОС — работай через нас</div>
+      </a>
+      <a href="https://muzaffar699.github.io/2/" class="project-card">
+        <div class="card-title">новости</div>
+        <div class="card-description">новые новости каждые 10 минут.</div>
+      </a>
+      <a href="https://muzaffar699.github.io/3/" class="project-card">
+        <div class="card-title">МУЗЫКА</div>
+        <div class="card-description">слушай музыку с нами.</div>
+      </a>
+      <a href="https://muzaffar699.github.io/-ywbrkjgtlbz/" class="project-card">
+        <div class="card-title">энциклопедия</div>
+        <div class="card-description">находи инфу на любую тему.</div>
+      </a>
+      <a href="https://muzaffar699.github.io/-muzaffa/" class="project-card">
+        <div class="card-title">обо мне</div>
+        <div class="card-description">О проекте, обо мне и моём пути.</div>
+      </a>
+    </div>
 
-        searchInput.addEventListener('input', () => {
-            const value = searchInput.value.toLowerCase();
-            projects.forEach(card => {
-                const title = card.querySelector('.card-title').textContent.toLowerCase();
-                const desc = card.querySelector('.card-description').textContent.toLowerCase();
-                if (title.includes(value) || desc.includes(value)) {
-                    card.style.display = "block";
-                } else {
-                    card.style.display = "none";
-                }
-            });
-        });
-    </script>
+    <footer>
+      Основатель Шарипов Музаффар Анварович © 2025 | <a href="https://muzaffar699.github.io/4/" style="color:#555; text-decoration:none;">О нас</a>
+    </footer>
+  </div>
+
+  <script>
+    const searchInput = document.getElementById('search');
+    const projects = document.querySelectorAll('.project-card');
+
+    searchInput.addEventListener('input', () => {
+      const value = searchInput.value.toLowerCase();
+      projects.forEach(card => {
+        const title = card.querySelector('.card-title').textContent.toLowerCase();
+        const desc = card.querySelector('.card-description').textContent.toLowerCase();
+        if (title.includes(value) || desc.includes(value)) {
+          card.style.display = "block";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    });
+  </script>
 </body>
 </html>
-
-
-
-
-
