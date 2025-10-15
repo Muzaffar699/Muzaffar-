@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<!-- Основные мета-теги -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="theme-color" content="#1a4d2e">
+<meta name="author" content="MarketPlace Team">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta name="language" content="ru">
+<meta name="referrer" content="always">
+<meta name="distribution" content="global">
+<meta name="rating" content="general">
+<meta name="coverage" content="Worldwide">
+
+<!-- Title & SEO -->
+<title>MarketPlace — Маркетплейс товаров Центральной Азии</title>
+<meta name="description" content="MarketPlace — современная платформа для покупки и продажи товаров. Безопасные сделки, проверенные продавцы, удобный поиск.">
+<meta name="keywords" content="MarketPlace, маркетплейс, купить, продать, товары, онлайн магазин">
+
+<!-- Favicons -->
+<link rel="icon" href="https://via.placeholder.com/64/1a4d2e/ffffff?text=MP" type="image/png">
+<link rel="apple-touch-icon" href="https://via.placeholder.com/64/1a4d2e/ffffff?text=MP">
+
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+    :root {
+      --primary: #1a4d2e;
+      --primary-light: #2a6d3e;
+      --primary-dark: #0f3b22;
+      --secondary: #ff9f29;
+      --secondary-light: #ffb347;
+      --background: #0a1929;
+      --surface: #1a2b3c;
+      --surface-variant: #2d3e4f;
+      --on-surface: #ffffff;
+      --on-surface-variant: #b0bec5;
+      --card-bg: #1e2f40;
+      --text: #ffffff;
+      --text-light: #90a4ae;
+      --border: #37474f;
+      --success: #4caf50;
+      --error: #f44336;
+      --warning: #ff9800;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-lg: 20px;
+      --animation-duration: 300ms;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Rubik', sans-serif;
+      background: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Анимации */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    /* Шапка */
+    header {
+      background: var(--surface);
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary-light);
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+    }
+
+    /* Модальные окна */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--animation-duration) ease;
+    }
+
+    .modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 500px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface-variant);
+      color: var(--text);
+    }
+
+    /* Админ панель */
+    .admin-panel {
+      background: var(--surface);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: var(--radius);
+      display: none;
+    }
+
+    .admin-panel.active {
+      display: block;
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Список товаров */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem 0;
+    }
+
+    .product-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1rem;
+      transition: transform 0.3s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      margin-bottom: 1rem;
+    }
+
+    .product-price {
+      color: var(--primary-light);
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .admin-badge {
+      background: var(--warning);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+    }
+</style>
+</head>
+<body>
+  
+  <header>
+    <div class="logo">
+      <i class="fas fa-store"></i>
+      <span>MarketPlace</span>
+    </div>
+    <div class="auth-buttons" id="auth-buttons">
+      <button class="btn btn-outline" onclick="openModal('login-modal')">Войти</button>
+      <button class="btn btn-primary" onclick="openModal('register-modal')">Регистрация</button>
+    </div>
+    <div class="user-menu" id="user-menu" style="display: none;">
+      <span id="user-email"></span>
+      <button class="btn btn-outline" onclick="logout()">Выйти</button>
+    </div>
+  </header>
+
+  <div class="admin-panel" id="admin-panel">
+    <h3>Панель администратора</h3>
+    <div class="admin-actions">
+      <button class="btn btn-primary" onclick="openModal('add-product-modal')">Добавить товар</button>
+      <button class="btn btn-outline" onclick="refreshProducts()">Обновить список</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="products-grid" id="products-grid">
+      <!-- Товары будут здесь -->
+    </div>
+  </div>
+
+  <!-- Модальное окно входа -->
+  <div class="modal" id="login-modal">
+    <div class="modal-content">
+      <h3>Вход в систему</h3>
+      <div class="form-group">
+        <input type="email" id="login-email" class="form-control" placeholder="Email">
+      </div>
+      <div class="form-group">
+        <input type="password" id="login-password" class="form-control" placeholder="Пароль">
+      </div>
+      <button class="btn btn-primary" onclick="login()">Войти</button>
+      <button class="btn btn-outline" onclick="closeModal('login-modal')">Отмена</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно регистрации -->
+  <div class="modal" id="register-modal">
+    <div class="modal-content">
+      <h3>Регистрация</h3>
+      <div class="form-group">
+        <input type="text" id="register-name" class="form-control" placeholder="Имя">
+      </div>
+      <div class="form-group">
+        <input type="email" id="register-email" class="form-control" placeholder="Email">
+      </div>
+      <div class="form-group">
+        <input type="password" id="register-password" class="form-control" placeholder="Пароль">
+      </div>
+      <button class="btn btn-primary" onclick="register()">Зарегистрироваться</button>
+      <button class="btn btn-outline" onclick="closeModal('register-modal')">Отмена</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно добавления товара -->
+  <div class="modal" id="add-product-modal">
+    <div class="modal-content">
+      <h3>Добавить товар</h3>
+      <div class="form-group">
+        <input type="text" id="product-name" class="form-control" placeholder="Название товара">
+      </div>
+      <div class="form-group">
+        <input type="number" id="product-price" class="form-control" placeholder="Цена">
+      </div>
+      <div class="form-group">
+        <textarea id="product-description" class="form-control" placeholder="Описание"></textarea>
+      </div>
+      <div class="form-group">
+        <input type="text" id="product-image" class="form-control" placeholder="URL изображения">
+      </div>
+      <button class="btn btn-primary" onclick="addProduct()">Добавить</button>
+      <button class="btn btn-outline" onclick="closeModal('add-product-modal')">Отмена</button>
+    </div>
+  </div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+<script>
+  // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyB_9kumEubg6w3flpP8_iWy_9btubcCa38",
+    authDomain: "doroshop-cfb16.firebaseapp.com",
+    databaseURL: "https://doroshop-cfb16-default-rtdb.firebaseio.com",
+    projectId: "doroshop-cfb16",
+    storageBucket: "doroshop-cfb16.appspot.com",
+    messagingSenderId: "343457643268",
+    appId: "1:343457643268:web:0687d0ea1137124dafae51"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const auth = firebase.auth();
+
+  // Админ email (можно изменить)
+  const ADMIN_EMAIL = "admin@marketplace.tj";
+
+  let currentUser = null;
+
+  // Инициализация приложения
+  document.addEventListener('DOMContentLoaded', function() {
+    checkAuthState();
+    loadProducts();
+  });
+
+  // Проверка состояния аутентификации
+  function checkAuthState() {
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        currentUser = user;
+        showUserMenu(user);
+        if (user.email === ADMIN_EMAIL) {
+          showAdminPanel();
+        }
+      } else {
+        currentUser = null;
+        showAuthButtons();
+        hideAdminPanel();
+      }
+    });
+  }
+
+  // Показать меню пользователя
+  function showUserMenu(user) {
+    document.getElementById('auth-buttons').style.display = 'none';
+    document.getElementById('user-menu').style.display = 'block';
+    document.getElementById('user-email').textContent = user.email;
+  }
+
+  // Показать кнопки аутентификации
+  function showAuthButtons() {
+    document.getElementById('auth-buttons').style.display = 'flex';
+    document.getElementById('user-menu').style.display = 'none';
+  }
+
+  // Показать админ панель
+  function showAdminPanel() {
+    document.getElementById('admin-panel').classList.add('active');
+  }
+
+  // Скрыть админ панель
+  function hideAdminPanel() {
+    document.getElementById('admin-panel').classList.remove('active');
+  }
+
+  // Регистрация
+  function register() {
+    const name = document.getElementById('register-name').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+
+    auth.createUserWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        
+        // Сохраняем данные пользователя
+        return db.ref('users/' + user.uid).set({
+          name: name,
+          email: email,
+          createdAt: firebase.database.ServerValue.TIMESTAMP
+        });
+      })
+      .then(() => {
+        alert('Регистрация успешна!');
+        closeModal('register-modal');
+      })
+      .catch((error) => {
+        alert('Ошибка регистрации: ' + error.message);
+      });
+  }
+
+  // Вход
+  function login() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    auth.signInWithEmailAndPassword(email, password)
+      .then(() => {
+        alert('Вход успешен!');
+        closeModal('login-modal');
+      })
+      .catch((error) => {
+        alert('Ошибка входа: ' + error.message);
+      });
+  }
+
+  // Выход
+  function logout() {
+    auth.signOut()
+      .then(() => {
+        alert('Вы вышли из системы');
+      })
+      .catch((error) => {
+        alert('Ошибка выхода: ' + error.message);
+      });
+  }
+
+  // Загрузка товаров
+  function loadProducts() {
+    db.ref('products').on('value', (snapshot) => {
+      const products = snapshot.val();
+      const productsGrid = document.getElementById('products-grid');
+      productsGrid.innerHTML = '';
+
+      if (products) {
+        Object.keys(products).forEach((productId) => {
+          const product = products[productId];
+          const productCard = createProductCard(productId, product);
+          productsGrid.appendChild(productCard);
+        });
+      } else {
+        productsGrid.innerHTML = '<p>Товаров пока нет</p>';
+      }
+    });
+  }
+
+  // Создание карточки товара
+  function createProductCard(productId, product) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    
+    card.innerHTML = `
+      <img src="${product.image || 'https://via.placeholder.com/300x200/1a2b3c/ffffff?text=No+Image'}" 
+           alt="${product.name}" 
+           class="product-image"
+           onerror="this.src='https://via.placeholder.com/300x200/1a2b3c/ffffff?text=No+Image'">
+      <h3>${product.name}</h3>
+      <p>${product.description || 'Описание отсутствует'}</p>
+      <div class="product-price">${product.price} сом</div>
+      ${currentUser && currentUser.email === ADMIN_EMAIL ? `
+        <div style="margin-top: 1rem;">
+          <button class="btn btn-outline" onclick="editProduct('${productId}')">Редактировать</button>
+          <button class="btn btn-outline" onclick="deleteProduct('${productId}')" style="background: var(--error); color: white;">Удалить</button>
+        </div>
+      ` : ''}
+    `;
+
+    return card;
+  }
+
+  // Добавление товара
+  function addProduct() {
+    if (!currentUser || currentUser.email !== ADMIN_EMAIL) {
+      alert('Только администратор может добавлять товары');
+      return;
+    }
+
+    const name = document.getElementById('product-name').value;
+    const price = document.getElementById('product-price').value;
+    const description = document.getElementById('product-description').value;
+    const image = document.getElementById('product-image').value;
+
+    const productData = {
+      name: name,
+      price: parseFloat(price),
+      description: description,
+      image: image,
+      createdAt: firebase.database.ServerValue.TIMESTAMP,
+      createdBy: currentUser.uid
+    };
+
+    db.ref('products').push(productData)
+      .then(() => {
+        alert('Товар добавлен!');
+        closeModal('add-product-modal');
+        // Очищаем форму
+        document.getElementById('product-name').value = '';
+        document.getElementById('product-price').value = '';
+        document.getElementById('product-description').value = '';
+        document.getElementById('product-image').value = '';
+      })
+      .catch((error) => {
+        alert('Ошибка добавления товара: ' + error.message);
+      });
+  }
+
+  // Редактирование товара
+  function editProduct(productId) {
+    const newName = prompt('Введите новое название товара:');
+    const newPrice = prompt('Введите новую цену:');
+    
+    if (newName && newPrice) {
+      db.ref('products/' + productId).update({
+        name: newName,
+        price: parseFloat(newPrice)
+      })
+      .then(() => {
+        alert('Товар обновлен!');
+      })
+      .catch((error) => {
+        alert('Ошибка обновления товара: ' + error.message);
+      });
+    }
+  }
+
+  // Удаление товара
+  function deleteProduct(productId) {
+    if (confirm('Вы уверены, что хотите удалить этот товар?')) {
+      db.ref('products/' + productId).remove()
+        .then(() => {
+          alert('Товар удален!');
+        })
+        .catch((error) => {
+          alert('Ошибка удаления товара: ' + error.message);
+        });
+    }
+  }
+
+  // Обновление списка товаров
+  function refreshProducts() {
+    loadProducts();
+  }
+
+  // Управление модальными окнами
+  function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+  }
+
+  // Закрытие модальных окон при клике вне их
+  document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal')) {
+        e.target.classList.remove('active');
+      }
+    });
+  });
+</script>
+</body>
+</html>
