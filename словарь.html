@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Словарь MUZAFFAR</title>
+    <style>
+        /* Цветовая схема */
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --dark: #1a1a2e;
+            --darker: #16213e;
+            --light: #f8f9fa;
+            --gray: #e9ecef;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --gradient: linear-gradient(135deg, #4361ee 0%, #7209b7 100%);
+        }
+
+        /* Общий стиль */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #1a1a2e);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: var(--gray);
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--darker);
+            border-radius: 50px;
+            padding: 5px;
+            box-shadow: var(--shadow);
+            margin-bottom: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--primary);
+        }
+
+        input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            background: transparent;
+            color: var(--light);
+            font-size: 16px;
+            outline: none;
+            border-radius: 50px;
+        }
+
+        input::placeholder {
+            color: #a0a0a0;
+        }
+
+        .search-btn {
+            background: var(--gradient);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .search-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        .search-btn:active {
+            transform: scale(0.98);
+        }
+
+        .search-btn img {
+            width: 20px;
+            height: 20px;
+            filter: invert(1);
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 25px;
+            background: var(--darker);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            text-align: left;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        #result.show {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 1000px;
+        }
+
+        #result h2 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 24px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+
+        #result p {
+            line-height: 1.6;
+            color: var(--gray);
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .hint {
+            color: #a0a0a0;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Словарь MUZAFFAR</h1>
+        <p class="subtitle">Найдите определение любого слова</p>
+        <div class="search-box">
+            <input type="text" id="search" placeholder="Введите слово для поиска...">
+            <button class="search-btn" onclick="searchWord()">
+                <img src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="🔍">
+            </button>
+        </div>
+        <p class="hint">Нажмите Enter для поиска</p>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function searchWord() {
+            let query = document.getElementById("search").value.trim();
+            let resultDiv = document.getElementById("result");
+            
+            if (query === "") {
+                resultDiv.innerHTML = "<p>Пожалуйста, введите слово для поиска.</p>";
+                resultDiv.classList.add("show");
+                return;
+            }
+
+            resultDiv.innerHTML = "<p>Поиск...</p>";
+            resultDiv.classList.add("show");
+
+            let url = `https://ru.wikipedia.org/api/rest_v1/page/summary/${query}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.type === "https://mediawiki.org/wiki/HyperSwitch/errors/not_found") {
+                        resultDiv.innerHTML = "<p>Слово не найдено. Проверьте правильность написания.</p>";
+                    } else {
+                        let image = data.originalimage ? `<img src="${data.originalimage.source}" alt="${data.title}">` : "";
+                        resultDiv.innerHTML = `
+                            <h2>${data.title}</h2>
+                            ${image}
+                            <p>${data.extract}</p>
+                        `;
+                    }
+                })
+                .catch(() => {
+                    resultDiv.innerHTML = "<p>Ошибка загрузки данных. Проверьте подключение к интернету.</p>";
+                });
+        }
+
+        // Добавляем обработчик события для клавиши Enter
+        document.getElementById("search").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                searchWord();
+            }
+        });
+    </script>
+</body>
+</html>
