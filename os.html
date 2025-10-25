@@ -35,8 +35,24 @@
   .app-item { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#fff; margin:5px 0; border-radius:5px; border:1px solid #ddd; }
   .delete-btn { background:#ff6b6b; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; }
   
-  /* Стили для Muzaffar Pay */
-  .pay-card { background:linear-gradient(135deg,#1c92d2,#f2fcfe); color:#fff; padding:20px; border-radius:15px; box-shadow:0 4px 10px rgba(0,0,0,0.3); width:90%; margin:0 auto 20px; }
+  /* Стили для выбора иконки */
+  .icon-selection { display:grid; grid-template-columns:repeat(auto-fill, minmax(60px, 1fr)); gap:10px; margin:10px 0; }
+  .icon-option { width:60px; height:60px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent; }
+  .icon-option.selected { border-color:#1c92d2; }
+  
+  /* Стили для камеры */
+  .camera-container { text-align:center; }
+  .camera-preview { width:100%; max-width:500px; height:auto; background:#000; margin:10px auto; }
+  .camera-controls { display:flex; justify-content:center; gap:10px; margin:15px 0; }
+  .camera-switch { background:#333; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer; }
+  .capture-btn { background:#1c92d2; color:white; border:none; width:60px; height:60px; border-radius:50%; font-size:24px; cursor:pointer; }
+  
+  /* Стили для галереи */
+  .gallery-container { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; padding:10px; }
+  .gallery-item { width:100%; height:150px; object-fit:cover; border-radius:5px; cursor:pointer; }
+  .gallery-fullscreen { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; display:flex; justify-content:center; align-items:center; flex-direction:column; }
+  .gallery-fullscreen img { max-width:90%; max-height:80%; }
+  .gallery-close { position:absolute; top:20px; right:20px; background:#fff; color:#000; border:none; width:40px; height:40px; border-radius:50%; font-size:20px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -63,9 +79,10 @@
           <input type="url" id="appUrl" placeholder="https://example.com">
         </div>
         <div class="form-group">
-          <label>Иконка (URL):</label>
-          <input type="url" id="appIcon" placeholder="https://img.icons8.com/fluency/96/name.png">
-          <small>Можно найти иконки на <a href="https://icons8.com" target="_blank">icons8.com</a></small>
+          <label>Выберите иконку:</label>
+          <div class="icon-selection" id="iconSelection">
+            <!-- Иконки будут добавлены через JavaScript -->
+          </div>
         </div>
         <button onclick="createNewApp()">➕ Создать приложение</button>
       </div>
@@ -94,38 +111,67 @@
     
     <div class="setting-section">
       <div class="setting-title">⚡ Быстрые действия</div>
-      <button onclick="addSampleApps()">➕ Добавить примеры приложений</button>
       <button onclick="clearAllApps()" style="background:#ff6b6b;">🗑️ Удалить все приложения</button>
     </div>
   </div>
 </div>
 
-<!-- ------------------------ Muzaffar Pay App ------------------------ -->
-<div id="payApp" class="app">
+<!-- ------------------------ Muzaffar OS App ------------------------ -->
+<div id="muzaffarOSApp" class="app">
   <div class="app-header">
-    💳 Muzaffar Pay
-    <button class="close-btn" onclick="closeApp('payApp')">×</button>
+    🌐 Muzaffar OS
+    <button class="close-btn" onclick="closeApp('muzaffarOSApp')">×</button>
   </div>
-  <div class="app-body" style="text-align:center;">
-    <div class="pay-card">
-      <h2>Muzaffar Pay</h2>
-      <p id="balance" style="font-size:24px;font-weight:bold;">0 ₮</p>
-    </div>
-
-    <div>
-      <input id="amount" type="number" placeholder="Сумма перевода">
-      <br>
-      <button onclick="generateCode()">Создать код</button>
-      <button onclick="applyCode()">Получить перевод</button>
-    </div>
-
-    <div id="transferCode" style="margin-top:15px;font-weight:bold;color:#1c92d2;"></div>
-
-    <hr style="margin:20px 0;border:none;height:1px;background:#ddd;">
-
-    <h3>История</h3>
-    <ul id="history" style="list-style:none;padding:0;max-height:200px;overflow-y:auto;"></ul>
+  <div class="app-body">
+    <iframe src="https://muzaffar699.github.io/Muzaffar-/index.html" class="app-iframe"></iframe>
   </div>
+</div>
+
+<!-- ------------------------ Muzaffar Bank App ------------------------ -->
+<div id="bankApp" class="app">
+  <div class="app-header">
+    🏦 Muzaffar Bank
+    <button class="close-btn" onclick="closeApp('bankApp')">×</button>
+  </div>
+  <div class="app-body">
+    <iframe src="https://muzaffar699.github.io/Muzaffar-/Muzaffarbank" class="app-iframe"></iframe>
+  </div>
+</div>
+
+<!-- ------------------------ Камера App ------------------------ -->
+<div id="cameraApp" class="app">
+  <div class="app-header">
+    📷 Камера
+    <button class="close-btn" onclick="closeApp('cameraApp')">×</button>
+  </div>
+  <div class="app-body camera-container">
+    <video id="cameraPreview" class="camera-preview" autoplay playsinline></video>
+    <div class="camera-controls">
+      <button class="camera-switch" onclick="switchCamera()">Переключить камеру</button>
+      <button class="capture-btn" onclick="capturePhoto()">📸</button>
+    </div>
+    <canvas id="cameraCanvas" style="display:none;"></canvas>
+  </div>
+</div>
+
+<!-- ------------------------ Галерея App ------------------------ -->
+<div id="galleryApp" class="app">
+  <div class="app-header">
+    🖼️ Галерея
+    <button class="close-btn" onclick="closeApp('galleryApp')">×</button>
+  </div>
+  <div class="app-body">
+    <div id="galleryContainer" class="gallery-container">
+      <!-- Фотографии будут добавляться сюда -->
+    </div>
+  </div>
+</div>
+
+<!-- ------------------------ Полноэкранный просмотр фото ------------------------ -->
+<div id="fullscreenView" class="gallery-fullscreen" style="display:none;">
+  <button class="gallery-close" onclick="closeFullscreen()">×</button>
+  <img id="fullscreenImage" src="" alt="Полноэкранный просмотр">
+  <button onclick="deletePhoto()" style="background:#ff6b6b; margin-top:20px;">Удалить фото</button>
 </div>
 
 <script>
@@ -133,19 +179,45 @@
   let userApps = JSON.parse(localStorage.getItem('muzaffar_user_apps') || '[]');
   let nextPosition = { x: 40, y: 40 };
   const GRID_SIZE = 100;
+  
+  // Переменные для камеры
+  let currentStream = null;
+  let facingMode = 'environment';
+  let currentPhotoId = null;
+  
+  // Доступные иконки
+  const availableIcons = [
+    'https://img.icons8.com/fluency/96/application.png',
+    'https://img.icons8.com/fluency/96/internet.png',
+    'https://img.icons8.com/fluency/96/youtube.png',
+    'https://img.icons8.com/fluency/96/google-logo.png',
+    'https://img.icons8.com/fluency/96/gmail.png',
+    'https://img.icons8.com/fluency/96/facebook.png',
+    'https://img.icons8.com/fluency/96/instagram.png',
+    'https://img.icons8.com/fluency/96/twitter.png',
+    'https://img.icons8.com/fluency/96/spotify.png',
+    'https://img.icons8.com/fluency/96/netflix.png',
+    'https://img.icons8.com/fluency/96/calculator.png',
+    'https://img.icons8.com/fluency/96/calendar.png',
+    'https://img.icons8.com/fluency/96/clock.png',
+    'https://img.icons8.com/fluency/96/weather.png',
+    'https://img.icons8.com/fluency/96/map.png'
+  ];
 
   // ------------------------ Инициализация ------------------------
   document.addEventListener('DOMContentLoaded', function() {
     loadUserApps();
     updateAppsList();
+    loadGallery();
+    loadIconSelection();
   });
 
   // ------------------------ Управление приложениями ------------------------
   function loadUserApps() {
     const desktop = document.getElementById('desktop');
     
-    // Очищаем десктоп (кроме настроек и Muzaffar Pay)
-    const existingIcons = desktop.querySelectorAll('.icon:not(#settingsIcon):not(#payIcon)');
+    // Очищаем десктоп (кроме фиксированных приложений)
+    const existingIcons = desktop.querySelectorAll('.icon:not([data-fixed])');
     existingIcons.forEach(icon => icon.remove());
     
     // Добавляем приложения пользователя
@@ -153,7 +225,7 @@
       createAppIcon(app);
     });
     
-    // Добавляем фиксированные приложения (Настройки и Muzaffar Pay)
+    // Добавляем фиксированные приложения
     createFixedApps();
   }
 
@@ -178,6 +250,9 @@
   }
 
   function createAppIframe(app) {
+    // Для не-iframe приложений не создаем контейнер
+    if (app.id && app.id.startsWith('fixed_')) return;
+    
     const iframe = document.createElement('iframe');
     iframe.id = `appFrame_${app.id}`;
     iframe.className = 'app-iframe';
@@ -202,37 +277,77 @@
     const desktop = document.getElementById('desktop');
     
     // Настройки
-    const settingsIcon = document.createElement('div');
-    settingsIcon.className = 'icon';
-    settingsIcon.style.left = '40px';
-    settingsIcon.style.top = '40px';
-    settingsIcon.innerHTML = `
-      <img src="https://img.icons8.com/fluency/96/settings.png" alt="Настройки">
-      <div>Настройки</div>
-    `;
-    settingsIcon.onclick = () => openApp('settingsApp');
+    const settingsIcon = createFixedAppIcon('settings', 'https://img.icons8.com/fluency/96/settings.png', 'Настройки', 'settingsApp', 40, 40);
     desktop.appendChild(settingsIcon);
     
-    // Muzaffar Pay
-    const payIcon = document.createElement('div');
-    payIcon.className = 'icon';
-    payIcon.style.left = '140px';
-    payIcon.style.top = '40px';
-    payIcon.innerHTML = `
-      <img src="https://img.icons8.com/fluency/96/bank-cards.png" alt="Muzaffar Pay">
-      <div>Muzaffar Pay</div>
+    // Muzaffar OS
+    const osIcon = createFixedAppIcon('muzaffarOS', 'https://img.icons8.com/fluency/96/os.png', 'Muzaffar OS', 'muzaffarOSApp', 140, 40);
+    desktop.appendChild(osIcon);
+    
+    // Muzaffar Bank
+    const bankIcon = createFixedAppIcon('bank', 'https://img.icons8.com/fluency/96/bank.png', 'Muzaffar Bank', 'bankApp', 240, 40);
+    desktop.appendChild(bankIcon);
+    
+    // Камера
+    const cameraIcon = createFixedAppIcon('camera', 'https://img.icons8.com/fluency/96/camera.png', 'Камера', 'cameraApp', 340, 40);
+    desktop.appendChild(cameraIcon);
+    
+    // Галерея
+    const galleryIcon = createFixedAppIcon('gallery', 'https://img.icons8.com/fluency/96/picture.png', 'Галерея', 'galleryApp', 440, 40);
+    desktop.appendChild(galleryIcon);
+  }
+
+  function createFixedAppIcon(id, iconUrl, name, appId, x, y) {
+    const icon = document.createElement('div');
+    icon.className = 'icon';
+    icon.style.left = x + 'px';
+    icon.style.top = y + 'px';
+    icon.setAttribute('data-fixed', 'true');
+    
+    icon.innerHTML = `
+      <img src="${iconUrl}" alt="${name}">
+      <div>${name}</div>
     `;
-    payIcon.onclick = () => openApp('payApp');
-    desktop.appendChild(payIcon);
+    
+    icon.onclick = () => openApp(appId);
+    return icon;
+  }
+
+  function loadIconSelection() {
+    const iconSelection = document.getElementById('iconSelection');
+    iconSelection.innerHTML = '';
+    
+    availableIcons.forEach(iconUrl => {
+      const img = document.createElement('img');
+      img.src = iconUrl;
+      img.className = 'icon-option';
+      img.onclick = function() {
+        // Убираем выделение у всех иконок
+        document.querySelectorAll('.icon-option').forEach(icon => {
+          icon.classList.remove('selected');
+        });
+        // Выделяем выбранную иконку
+        this.classList.add('selected');
+      };
+      iconSelection.appendChild(img);
+    });
   }
 
   function createNewApp() {
     const name = document.getElementById('appName').value.trim();
     const url = document.getElementById('appUrl').value.trim();
-    const icon = document.getElementById('appIcon').value.trim() || 'https://img.icons8.com/fluency/96/application.png';
+    
+    // Получаем выбранную иконку
+    const selectedIcon = document.querySelector('.icon-option.selected');
+    const icon = selectedIcon ? selectedIcon.src : availableIcons[0];
     
     if (!name || !url) {
       alert('Пожалуйста, заполните название и URL приложения');
+      return;
+    }
+    
+    if (!selectedIcon) {
+      alert('Пожалуйста, выберите иконку для приложения');
       return;
     }
     
@@ -255,7 +370,11 @@
     // Очищаем форму
     document.getElementById('appName').value = '';
     document.getElementById('appUrl').value = '';
-    document.getElementById('appIcon').value = '';
+    
+    // Сбрасываем выделение иконки
+    document.querySelectorAll('.icon-option').forEach(icon => {
+      icon.classList.remove('selected');
+    });
     
     alert(`Приложение "${name}" создано!`);
   }
@@ -327,6 +446,16 @@
 
   // ------------------------ Управление окнами ------------------------
   function openApp(id) {
+    // Останавливаем камеру при открытии другого приложения
+    if (id !== 'cameraApp' && currentStream) {
+      stopCamera();
+    }
+    
+    // Запускаем камеру при открытии приложения камеры
+    if (id === 'cameraApp' && !currentStream) {
+      startCamera();
+    }
+    
     document.getElementById(id).style.display = 'block';
   }
 
@@ -335,47 +464,15 @@
   }
 
   function closeApp(id) {
+    // Останавливаем камеру при закрытии приложения камеры
+    if (id === 'cameraApp' && currentStream) {
+      stopCamera();
+    }
+    
     document.getElementById(id).style.display = 'none';
   }
 
   // ------------------------ Вспомогательные функции ------------------------
-  function addSampleApps() {
-    const sampleApps = [
-      {
-        name: 'YouTube',
-        url: 'https://www.youtube.com',
-        icon: 'https://img.icons8.com/color/96/youtube-play.png'
-      },
-      {
-        name: 'Google',
-        url: 'https://www.google.com',
-        icon: 'https://img.icons8.com/color/96/google-logo.png'
-      },
-      {
-        name: 'Gmail',
-        url: 'https://mail.google.com',
-        icon: 'https://img.icons8.com/color/96/gmail.png'
-      }
-    ];
-    
-    sampleApps.forEach(appData => {
-      const position = getNextPosition();
-      const newApp = {
-        id: Date.now().toString() + Math.random(),
-        name: appData.name,
-        url: appData.url,
-        icon: appData.icon,
-        position: position
-      };
-      userApps.push(newApp);
-      createAppIcon(newApp);
-    });
-    
-    saveUserApps();
-    updateAppsList();
-    alert('Примеры приложений добавлены!');
-  }
-
   function clearAllApps() {
     if (confirm('Вы уверены, что хотите удалить ВСЕ приложения?')) {
       userApps = [];
@@ -386,38 +483,112 @@
     }
   }
 
-  // ------------------------ Muzaffar Pay ------------------------
-  let balance = parseFloat(localStorage.getItem('muzaffar_balance')) || 1000;
-  let history = JSON.parse(localStorage.getItem('muzaffar_history') || '[]');
-
-  function updatePayUI(){
-    document.getElementById('balance').textContent = balance.toFixed(2) + " ₮";
-    const list = document.getElementById('history');
-    list.innerHTML = history.map(h=>`<li>${h}</li>`).join('');
-    localStorage.setItem('muzaffar_balance', balance);
-    localStorage.setItem('muzaffar_history', JSON.stringify(history));
-  }
-  updatePayUI();
-
-  function generateCode(){
-    const amount=parseFloat(document.getElementById('amount').value);
-    if(!amount||amount<=0||amount>balance){alert('Неверная сумма');return;}
-    balance-=amount;
-    const code="MPAY-"+Math.random().toString(36).substring(2,7).toUpperCase()+"-"+amount;
-    document.getElementById('transferCode').textContent="Код перевода: "+code;
-    history.unshift(`Отправлено ${amount} ₮ (${code})`);
-    updatePayUI();
+  // ------------------------ Камера ------------------------
+  async function startCamera() {
+    try {
+      const constraints = {
+        video: { 
+          facingMode: facingMode,
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      };
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      const video = document.getElementById('cameraPreview');
+      video.srcObject = stream;
+      currentStream = stream;
+    } catch (err) {
+      console.error("Ошибка доступа к камере:", err);
+      alert("Не удалось получить доступ к камере. Проверьте разрешения.");
+    }
   }
 
-  function applyCode(){
-    const code=prompt("Введите код перевода:");
-    if(!code||!code.startsWith("MPAY-"))return;
-    const parts=code.split("-");
-    const amount=parseFloat(parts[2]);
-    if(!amount||isNaN(amount)){alert("Некорректный код");return;}
-    balance+=amount;
-    history.unshift(`Получено ${amount} ₮ (${code})`);
-    updatePayUI();
+  function stopCamera() {
+    if (currentStream) {
+      currentStream.getTracks().forEach(track => track.stop());
+      currentStream = null;
+    }
+  }
+
+  function switchCamera() {
+    facingMode = facingMode === 'environment' ? 'user' : 'environment';
+    stopCamera();
+    startCamera();
+  }
+
+  function capturePhoto() {
+    const video = document.getElementById('cameraPreview');
+    const canvas = document.getElementById('cameraCanvas');
+    const context = canvas.getContext('2d');
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    const photoData = canvas.toDataURL('image/png');
+    savePhoto(photoData);
+    
+    // Показать уведомление о сохранении
+    alert('Фото сохранено в галерею!');
+  }
+
+  // ------------------------ Галерея ------------------------
+  function savePhoto(photoData) {
+    const photos = JSON.parse(localStorage.getItem('muzaffar_photos') || '[]');
+    const newPhoto = {
+      id: Date.now().toString(),
+      data: photoData,
+      date: new Date().toLocaleString()
+    };
+    
+    photos.unshift(newPhoto);
+    localStorage.setItem('muzaffar_photos', JSON.stringify(photos));
+    loadGallery();
+  }
+
+  function loadGallery() {
+    const galleryContainer = document.getElementById('galleryContainer');
+    const photos = JSON.parse(localStorage.getItem('muzaffar_photos') || '[]');
+    
+    galleryContainer.innerHTML = '';
+    
+    if (photos.length === 0) {
+      galleryContainer.innerHTML = '<p>В галерее пока нет фото</p>';
+      return;
+    }
+    
+    photos.forEach(photo => {
+      const img = document.createElement('img');
+      img.src = photo.data;
+      img.alt = 'Фото';
+      img.className = 'gallery-item';
+      img.onclick = () => openFullscreen(photo.id, photo.data);
+      galleryContainer.appendChild(img);
+    });
+  }
+
+  function openFullscreen(photoId, photoData) {
+    currentPhotoId = photoId;
+    document.getElementById('fullscreenImage').src = photoData;
+    document.getElementById('fullscreenView').style.display = 'flex';
+  }
+
+  function closeFullscreen() {
+    document.getElementById('fullscreenView').style.display = 'none';
+    currentPhotoId = null;
+  }
+
+  function deletePhoto() {
+    if (!currentPhotoId) return;
+    
+    if (confirm('Удалить это фото?')) {
+      let photos = JSON.parse(localStorage.getItem('muzaffar_photos') || '[]');
+      photos = photos.filter(photo => photo.id !== currentPhotoId);
+      localStorage.setItem('muzaffar_photos', JSON.stringify(photos));
+      loadGallery();
+      closeFullscreen();
+    }
   }
 
   // ------------------------ Обои ------------------------
@@ -445,4 +616,4 @@
   document.getElementById('wallpaperSelect').dispatchEvent(new Event('change'));
 </script>
 </body>
-</html> 
+</html>
