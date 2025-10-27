@@ -700,10 +700,10 @@
                     <h1>Muzaffardream</h1>
                 </div>
                 <div class="footer-links">
-                    <a href="DOROSfamd.com">DOROSfamd</a>
+                    <a href="is.gd/muzaffar">MAWORLD</a>
                     <a href="#">Правила: имейте человечность!</a>
-                    <a href="#">Контакты: +992 92-814-6776</a>
-                    <a href="#">Владелец: Розиков Мубин</a>
+                    <a href="#">Контакты: +992 92-631-0060</a>
+                    <a href="#">Владелец: Шарипов Музаффар Анварович</a>
                 </div>
                 <p>© 2025 Muzaffardream. Все права защищены.</p>
             </div>
@@ -712,9 +712,9 @@
 
     <script>
         // =========================================================================
-        //                          НАСТРОЙКИ FIREBASE И АДМИНА (ФУНКЦИОНАЛ БЕЗ ИЗМЕНЕНИЙ)
+        //                          НАСТРОЙКИ FIREBASE И АДМИНА
         // =========================================================================
-        // !!! ЭТО ЖЕСТКО ЗАКОДИРОВАННЫЙ ТЕСТОВЫЙ АККАУНТ ДЛЯ ПРОТОТИПА !!!
+        // !!! ТЕСТОВЫЙ АККАУНТ ДЛЯ ЛОКАЛЬНОГО ВХОДА !!!
         const ADMIN_NAME = "Muzaffar dream";
         const ADMIN_EMAIL = "muzaffar@dreamfamd.com"; 
         const ADMIN_PASSWORD = "test123"; 
@@ -821,7 +821,7 @@
                 adminLoginForm.querySelector('.admin-submit-btn').style.display = 'none';
                 adminLogoutLink.style.display = 'block';
             } else {
-                openAdminModalBtn.textContent = 'Админ Вход';
+                openAdminModalBtn.textContent = ' Вход';
                 openAdminModalBtn.style.backgroundColor = '#c0392b';
                 openAdminModalBtn.style.color = 'var(--light)';
                 adminEmailInput.parentElement.style.display = 'block'; 
@@ -939,7 +939,7 @@
         }
 
         // =========================================================================
-        //                          ОБРАБОТЧИКИ СОБЫТИЙ (ЛОГИКА БЕЗ ИЗМЕНЕНИЙ)
+        //                          ОБРАБОТЧИКИ СОБЫТИЙ (С ИСПРАВЛЕНИЕМ АДМИНА)
         // =========================================================================
 
         // Модальное окно "Добавить желание"
@@ -1011,7 +1011,7 @@
                 });
         });
 
-        // --- Обработчики Админ-панели (ЛОКАЛЬНАЯ ПРОВЕРКА) ---
+        // --- Обработчики Админ-панели (ИСПРАВЛЕНО: нет автозаполнения) ---
 
         openAdminModalBtn.addEventListener('click', () => {
             if (isAdminLoggedIn) {
@@ -1024,8 +1024,9 @@
             adminModal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             
-            adminEmailInput.value = ADMIN_EMAIL;
-            adminPasswordInput.value = ADMIN_PASSWORD;
+            // !!! ИСПРАВЛЕНИЕ: Очищаем поля, чтобы не было автозаполнения !!!
+            adminEmailInput.value = '';
+            adminPasswordInput.value = '';
         });
 
         closeAdminModalBtn.addEventListener('click', () => {
