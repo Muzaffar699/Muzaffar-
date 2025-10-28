@@ -141,6 +141,10 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             position: relative;
             color: var(--light);
+            /* ИСПРАВЛЕНИЕ: Обеспечивает прокрутку содержимого модального окна */
+            max-height: 90vh; 
+            overflow-y: auto; 
+            /* Конец ИСПРАВЛЕНИЯ */
         }
 
         .close-modal {
@@ -742,6 +746,11 @@
         const maxPrice = document.getElementById('maxPrice');
         const applyFiltersBtn = document.getElementById('applyFiltersBtn');
         
+        const openAdminModalBtn = document.getElementById('openAdminModalBtn');
+        const closeAdminModalBtn = document.getElementById('closeAdminModalBtn');
+        const adminModal = document.getElementById('adminModal');
+        const adminLoginForm = document.getElementById('adminLoginForm');
+
         // =========================================================================
         //                          УТИЛИТЫ И АДМИН-ЛОГИКА
         // =========================================================================
@@ -784,7 +793,6 @@
         }
 
         function updateAdminUI() {
-            const openAdminModalBtn = document.getElementById('openAdminModalBtn');
             const deleteButtons = document.querySelectorAll('.delete-wish-btn');
             
             if (isAdminLoggedIn) {
@@ -801,7 +809,7 @@
         }
         
         // --- Логика Админ-панели ---
-        document.getElementById('openAdminModalBtn').addEventListener('click', () => {
+        openAdminModalBtn.addEventListener('click', () => {
             if (isAdminLoggedIn) {
                 localStorage.removeItem('isAdmin');
                 isAdminLoggedIn = false;
@@ -809,17 +817,18 @@
                 showToast('Выход выполнен.');
                 return;
             }
-            document.getElementById('adminModal').style.display = 'flex';
+            adminModal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
+            // Очищаем поля
             document.getElementById('adminEmail').value = '';
             document.getElementById('adminPassword').value = '';
         });
 
-        document.getElementById('closeAdminModalBtn').addEventListener('click', () => {
-            closeModal(document.getElementById('adminModal'));
+        closeAdminModalBtn.addEventListener('click', () => {
+            closeModal(adminModal);
         });
 
-        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+        adminLoginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = document.getElementById('adminEmail').value;
             const password = document.getElementById('adminPassword').value;
@@ -828,7 +837,7 @@
                 isAdminLoggedIn = true;
                 localStorage.setItem('isAdmin', 'true');
                 showToast(`Вход выполнен как Администратор ${ADMIN_NAME}!`);
-                closeModal(document.getElementById('adminModal'));
+                closeModal(adminModal);
                 updateAdminUI();
             } else {
                 showToast('Неверный Email или Пароль для Администратора.');
@@ -931,6 +940,7 @@
                     deleteWish(wishId);
                 });
             });
+            updateAdminUI(); // Обновляем видимость кнопок удаления после рендера
         }
 
         // Применение фильтров
@@ -998,7 +1008,7 @@
                 .then(() => {
                     showToast('✅ Услуга успешно добавлена!');
                     wishForm.reset();
-                    closeModal(document.getElementById('wishModal'));
+                    closeModal(wishModal);
                 })
                 .catch((error) => {
                     console.error('Ошибка записи в базу данных:', error);
@@ -1012,12 +1022,12 @@
 
         // --- Обработчики форм и фильтров ---
         document.getElementById('openModalBtn').addEventListener('click', () => {
-            document.getElementById('wishModal').style.display = 'flex';
+            wishModal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
         });
 
         document.getElementById('closeModalBtn').addEventListener('click', () => {
-            closeModal(document.getElementById('wishModal'));
+            closeModal(wishModal);
         });
         
         bankSelect.addEventListener('change', (e) => {
@@ -1036,6 +1046,15 @@
         categoryFilter.addEventListener('change', applyFilters);
         minPrice.addEventListener('input', applyFilters);
         maxPrice.addEventListener('input', applyFilters);
+
+        window.addEventListener('click', (e) => {
+            if (e.target === wishModal) {
+                closeModal(wishModal);
+            }
+            if (e.target === adminModal) {
+                closeModal(adminModal);
+            }
+        });
 
 
         // --- Загрузка при старте ---
