@@ -157,6 +157,9 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             position: relative;
             color: var(--light);
+            /* Добавим прокрутку для модального окна */
+            max-height: 90vh; 
+            overflow-y: auto; 
         }
 
         .close-modal {
@@ -419,9 +422,13 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            display: flex;
+            display: none; /* Скрыто по умолчанию */
             align-items: center;
             gap: 5px;
+        }
+        
+        .delete-wish-btn.visible {
+            display: flex;
         }
 
         .delete-wish-btn:hover {
@@ -729,7 +736,6 @@
             storageBucket: "dreamfamd.appspot.com",
             messagingSenderId: "15878889443",
             appId: "1:15878889443:web:62abeaebbf7220ccd14ad6",
-            measurementId: "G-62CR00NZSW",
             databaseURL: "https://dreamfamd-default-rtdb.firebaseio.com/"
         };
 
@@ -783,7 +789,12 @@
 
         function formatPrice(price) {
             if (price === undefined || price === null) return '0';
-            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' ₽';
+        }
+
+        function closeModal(modalElement) {
+            modalElement.style.display = 'none';
+            document.body.style.overflow = 'auto';
         }
 
         function deleteWish(wishId) {
@@ -807,43 +818,84 @@
 
 
         // =========================================================================
-        //                          ОБРАБОТКА ДАННЫХ И ИНТЕРФЕЙСА
+        //                          ОБРАБОТКА ИНТЕРФЕЙСА И ДАННЫХ
         // =========================================================================
 
         // Обновление состояния кнопки входа/выхода
         function updateAdminUI() {
+            const deleteButtons = document.querySelectorAll('.delete-wish-btn');
+            
             if (isAdminLoggedIn) {
                 openAdminModalBtn.textContent = `${ADMIN_NAME} (Выход)`;
-                openAdminModalBtn.style.backgroundColor = 'var(--secondary)'; // Желто-оранжевый
+                openAdminModalBtn.style.backgroundColor = 'var(--secondary)';
                 openAdminModalBtn.style.color = 'var(--darker)';
-                adminEmailInput.parentElement.style.display = 'none'; 
-                adminPasswordInput.parentElement.style.display = 'none';
-                adminLoginForm.querySelector('.admin-submit-btn').style.display = 'none';
+                adminLoginForm.style.display = 'none';
                 adminLogoutLink.style.display = 'block';
+                deleteButtons.forEach(btn => btn.classList.add('visible'));
             } else {
-                openAdminModalBtn.textContent = ' Вход';
+                openAdminModalBtn.textContent = 'Админ Вход';
                 openAdminModalBtn.style.backgroundColor = '#c0392b';
                 openAdminModalBtn.style.color = 'var(--light)';
-                adminEmailInput.parentElement.style.display = 'block'; 
-                adminPasswordInput.parentElement.style.display = 'block';
-                adminLoginForm.querySelector('.admin-submit-btn').style.display = 'block';
+                adminLoginForm.style.display = 'block';
                 adminLogoutLink.style.display = 'none';
+                deleteButtons.forEach(btn => btn.classList.remove('visible'));
             }
-            applyFilters(); 
         }
+        
+        // --- Логика Админ-панели ---
+        openAdminModalBtn.addEventListener('click', () => {
+            if (isAdminLoggedIn) {
+                localStorage.removeItem('isAdmin');
+                isAdminLoggedIn = false;
+                updateAdminUI();
+                showToast('Выход выполнен.');
+                return;
+            }
+            adminModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        });
 
-        // Загрузка желаний из Firebase
+        closeAdminModalBtn.addEventListener('click', () => {
+            closeModal(adminModal);
+        });
+
+        adminLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = adminEmailInput.value;
+            const password = adminPasswordInput.value;
+
+            if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+                isAdminLoggedIn = true;
+                localStorage.setItem('isAdmin', 'true');
+                updateAdminUI();
+                closeModal(adminModal);
+                showToast(`Вход выполнен как Администратор ${ADMIN_NAME}! 👑`);
+            } else {
+                showToast('Неверный Email или Пароль для Администратора.');
+            }
+        });
+
+        adminLogoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('isAdmin');
+            isAdminLoggedIn = false;
+            updateAdminUI();
+            showToast('Выход выполнен.');
+        });
+
+
+        // Чтение данных из Firebase
         function loadWishes() {
-            updateAdminUI(); 
+            wishesContainer.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
             
             database.ref('wishes').on('value', (snapshot) => {
                 wishes = [];
                 snapshot.forEach((childSnapshot) => {
                     const wish = childSnapshot.val();
                     
-                    // !!! КЛЮЧЕВОЙ ФИЛЬТР ДЛЯ DREAMFAMD: ИГНОРИРУЕМ ВСЕ, ЧТО ЯВЛЯЕТСЯ 'Service' !!!
+                    // !!! КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: ИГНОРИРУЕМ ВСЕ ЗАПИСИ ТИПА 'Service' !!!
                     if (wish.type === 'Service') {
-                        return; 
+                        return; // Пропускаем услуги, оставляем только желания и старые записи без типа
                     }
                     
                     wish.id = childSnapshot.key;
@@ -852,35 +904,34 @@
 
                 wishes.sort((a, b) => b.createdAt - a.createdAt);
                 applyFilters();
+                updateAdminUI();
             });
         }
 
-        // Отрисовка желаний 
+
+        // Рендеринг карточек желаний
         function renderWishes(wishesToRender) {
+            wishesContainer.innerHTML = '';
             
             if (wishesToRender.length === 0) {
                 wishesContainer.innerHTML = `
                     <div class="empty-state">
-                        <i class="fas fa-heart"></i>
-                        <p>Пока нет желаний, соответствующих вашим фильтрам. Попробуйте изменить параметры поиска или <a href="#" id="openModalBtnEmptyState" style="color: var(--primary);">добавьте своё желание</a>.</p>
+                        <i class="fas fa-box-open"></i>
+                        <p>Пока нет желаний, соответствующих вашим фильтрам. Попробуйте изменить параметры или <a href="#" id="openModalBtnEmptyState" style="color: var(--primary);">добавьте свое желание</a>.</p>
                     </div>
                 `;
                 document.getElementById('openModalBtnEmptyState')?.addEventListener('click', (e) => {
                     e.preventDefault();
-                    openModalBtn.click();
+                    document.getElementById('openModalBtn').click();
                 });
                 return;
             }
 
-            wishesContainer.innerHTML = '';
             wishesToRender.forEach(wish => {
                 const wishCard = document.createElement('div');
                 wishCard.className = 'wish-card';
 
-                const adminButtonHTML = isAdminLoggedIn ?
-                    `<button class="delete-wish-btn" data-id="${wish.id}">
-                        <i class="fas fa-trash"></i> Удалить
-                    </button>` : '';
+                const adminButtonClass = isAdminLoggedIn ? 'visible' : '';
 
                 wishCard.innerHTML = `
                     <div class="wish-header">
@@ -889,17 +940,19 @@
                     </div>
                     <div class="wish-body">
                         <p class="wish-description">${wish.wish}</p>
-                        <div class="wish-price">${formatPrice(wish.price)} ₽</div>
+                        <div class="wish-price">Нужная сумма: ${formatPrice(wish.price)}</div>
                         <div class="wish-bank">
-                            <i class="fas fa-university"></i>
-                            <span>${wish.bank}</span>
+                            <i class="fas fa-credit-card"></i>
+                            <span>Карта: ${wish.bank}</span>
                         </div>
-                        <div class="wish-actions">
+                        <div class="wish-actions" style="margin-top: 20px;">
                             <button class="copy-card-btn" data-card="${wish.cardNumber}">
                                 <i class="far fa-copy"></i>
                                 Скопировать номер карты
                             </button>
-                            ${adminButtonHTML}
+                            <button class="delete-wish-btn ${adminButtonClass}" data-id="${wish.id}">
+                                <i class="fas fa-trash"></i> Удалить
+                            </button>
                         </div>
                     </div>
                 `;
@@ -923,7 +976,8 @@
             });
         }
 
-        // Применение фильтров
+
+        // Применение фильтров и поиска
         function applyFilters() {
             const searchTerm = searchInput.value.toLowerCase();
             const selectedBank = bankFilter.value;
@@ -932,11 +986,14 @@
             const maxPriceValue = maxPrice.value ? parseInt(maxPrice.value) : Infinity;
 
             filteredWishes = wishes.filter(wish => {
-                const matchesSearch = wish.name.toLowerCase().includes(searchTerm) ||
-                                     wish.wish.toLowerCase().includes(searchTerm);
+                const matchesSearch = (wish.name && wish.name.toLowerCase().includes(searchTerm)) ||
+                                     (wish.wish && wish.wish.toLowerCase().includes(searchTerm));
+                
                 const matchesBank = !selectedBank || selectedBank === 'other' || wish.bank === selectedBank || (selectedBank === 'other' && !['Сбербанк', 'Тинькофф', 'Kaspi', 'Альфа-Банк', 'ВТБ', 'Газпромбанк', 'Райффайзенбанк'].includes(wish.bank));
                 const matchesCategory = !selectedCategory || wish.category === selectedCategory;
-                const matchesPrice = wish.price >= minPriceValue && wish.price <= maxPriceValue;
+                
+                const price = wish.price ? parseInt(wish.price) : 0;
+                const matchesPrice = price >= minPriceValue && price <= maxPriceValue;
 
                 return matchesSearch && matchesBank && matchesCategory && matchesPrice;
             });
@@ -945,131 +1002,74 @@
         }
 
         // =========================================================================
-        //                          ОБРАБОТЧИКИ СОБЫТИЙ
+        //                          ЗАПИСЬ ДАННЫХ В FIREBASE
         // =========================================================================
 
-        // Модальное окно "Добавить желание"
+        wishForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const submitBtn = wishForm.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+
+            // 1. Сбор данных
+            const name = document.getElementById('name').value;
+            const wishText = document.getElementById('wish').value;
+            const price = document.getElementById('price').value;
+            const cardNumber = document.getElementById('cardNumber').value;
+            const category = document.getElementById('category').value;
+            
+            let bank = bankSelect.value;
+            if (bank === 'other') {
+                bank = otherBankInput.value || 'Другой банк';
+            }
+            
+            const newWish = {
+                type: 'Wish', // Указываем тип, чтобы сайт услуг его игнорировал
+                name: name,
+                wish: wishText,
+                price: price,
+                cardNumber: cardNumber, 
+                bank: bank,
+                category: category,
+                createdAt: firebase.database.ServerValue.TIMESTAMP 
+            };
+
+            // 2. Отправка в Firebase
+            database.ref('wishes').push(newWish)
+                .then(() => {
+                    showToast('✅ Желание успешно добавлено!');
+                    wishForm.reset();
+                    closeModal(wishModal);
+                })
+                .catch((error) => {
+                    console.error('Ошибка записи в базу данных:', error);
+                    showToast('❌ Ошибка при добавлении желания.');
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить желание';
+                });
+        });
+
+        // --- Обработчики форм и фильтров ---
         openModalBtn.addEventListener('click', () => {
             wishModal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
         });
 
         closeModalBtn.addEventListener('click', () => {
-            wishModal.style.display = 'none';
-            document.body.style.overflow = 'auto';
+            closeModal(wishModal);
         });
-
-        window.addEventListener('click', (e) => {
-            if (e.target === wishModal) {
-                wishModal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        });
-
+        
         bankSelect.addEventListener('change', (e) => {
             if (e.target.value === 'other') {
-                otherBankGroup.style.display = 'block';
-                otherBankInput.setAttribute('required', 'required');
+                document.getElementById('otherBankGroup').style.display = 'block';
+                document.getElementById('otherBank').setAttribute('required', 'required');
             } else {
-                otherBankGroup.style.display = 'none';
-                otherBankInput.removeAttribute('required');
+                document.getElementById('otherBankGroup').style.display = 'none';
+                document.getElementById('otherBank').removeAttribute('required');
             }
-        });
-
-        // Отправка формы желания (С ДОБАВЛЕНИЕМ ПОЛЯ type: 'Wish')
-        wishForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const name = document.getElementById('name').value;
-            const wishText = document.getElementById('wish').value;
-            const price = document.getElementById('price').value;
-            const cardNumber = document.getElementById('cardNumber').value;
-            const bank = bankSelect.value === 'other' ? otherBankInput.value : bankSelect.value;
-            const category = document.getElementById('category').value;
-
-            if (!name || !wishText || !price || !cardNumber || !bank || !category) {
-                showToast('Пожалуйста, заполните все поля');
-                return;
-            }
-
-            const newWish = {
-                type: 'Wish', // <-- ДОБАВЛЕННЫЙ ТИП ДЛЯ СТАРОГО САЙТА
-                name,
-                wish: wishText,
-                price: parseInt(price),
-                cardNumber,
-                bank,
-                category,
-                createdAt: firebase.database.ServerValue.TIMESTAMP
-            };
-
-            database.ref('wishes').push(newWish)
-                .then(() => {
-                    showToast('Желание успешно добавлено!');
-                    wishForm.reset();
-                    bankSelect.value = '';
-                    otherBankGroup.style.display = 'none';
-                    wishModal.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                })
-                .catch((error) => {
-                    console.error('Ошибка при сохранении:', error);
-                    showToast('Произошла ошибка при сохранении');
-                });
-        });
-
-        // --- Обработчики Админ-панели ---
-
-        openAdminModalBtn.addEventListener('click', () => {
-            if (isAdminLoggedIn) {
-                localStorage.removeItem('isAdmin');
-                isAdminLoggedIn = false;
-                updateAdminUI();
-                showToast('Выход выполнен.');
-                return;
-            }
-            adminModal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-            
-            adminEmailInput.value = '';
-            adminPasswordInput.value = '';
-        });
-
-        closeAdminModalBtn.addEventListener('click', () => {
-            adminModal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        });
-
-        window.addEventListener('click', (e) => {
-            if (e.target === adminModal) {
-                adminModal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        });
-
-        adminLoginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = adminEmailInput.value;
-            const password = adminPasswordInput.value;
-
-            if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-                isAdminLoggedIn = true;
-                localStorage.setItem('isAdmin', 'true');
-                updateAdminUI();
-                adminModal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-                showToast(`Вход выполнен как Администратор ${ADMIN_NAME}! 👑`);
-            } else {
-                showToast('Неверный Email или Пароль для Администратора.');
-            }
-        });
-
-        adminLogoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('isAdmin');
-            isAdminLoggedIn = false;
-            updateAdminUI();
-            showToast('Выход выполнен.');
         });
 
         // Обработчики событий для фильтров
@@ -1079,6 +1079,16 @@
         minPrice.addEventListener('input', applyFilters);
         maxPrice.addEventListener('input', applyFilters);
         applyFiltersBtn.addEventListener('click', applyFilters);
+
+        // Закрытие по клику вне модального окна
+        window.addEventListener('click', (e) => {
+            if (e.target === wishModal) {
+                closeModal(wishModal);
+            }
+            if (e.target === adminModal) {
+                closeModal(adminModal);
+            }
+        });
 
         // Загрузка данных при загрузке страницы
         window.addEventListener('DOMContentLoaded', loadWishes);
