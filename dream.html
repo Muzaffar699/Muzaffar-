@@ -840,6 +840,12 @@
                 wishes = [];
                 snapshot.forEach((childSnapshot) => {
                     const wish = childSnapshot.val();
+                    
+                    // !!! КЛЮЧЕВОЙ ФИЛЬТР ДЛЯ DREAMFAMD: ИГНОРИРУЕМ ВСЕ, ЧТО ЯВЛЯЕТСЯ 'Service' !!!
+                    if (wish.type === 'Service') {
+                        return; 
+                    }
+                    
                     wish.id = childSnapshot.key;
                     wishes.push(wish);
                 });
@@ -939,7 +945,7 @@
         }
 
         // =========================================================================
-        //                          ОБРАБОТЧИКИ СОБЫТИЙ (С ИСПРАВЛЕНИЕМ АДМИНА)
+        //                          ОБРАБОТЧИКИ СОБЫТИЙ
         // =========================================================================
 
         // Модальное окно "Добавить желание"
@@ -970,7 +976,7 @@
             }
         });
 
-        // Отправка формы желания
+        // Отправка формы желания (С ДОБАВЛЕНИЕМ ПОЛЯ type: 'Wish')
         wishForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -987,6 +993,7 @@
             }
 
             const newWish = {
+                type: 'Wish', // <-- ДОБАВЛЕННЫЙ ТИП ДЛЯ СТАРОГО САЙТА
                 name,
                 wish: wishText,
                 price: parseInt(price),
@@ -1011,7 +1018,7 @@
                 });
         });
 
-        // --- Обработчики Админ-панели (ИСПРАВЛЕНО: нет автозаполнения) ---
+        // --- Обработчики Админ-панели ---
 
         openAdminModalBtn.addEventListener('click', () => {
             if (isAdminLoggedIn) {
@@ -1024,7 +1031,6 @@
             adminModal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             
-            // !!! ИСПРАВЛЕНИЕ: Очищаем поля, чтобы не было автозаполнения !!!
             adminEmailInput.value = '';
             adminPasswordInput.value = '';
         });
