@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        /* Ваши стили остаются без изменений */
+        /* Все ваши стили остаются без изменений */
         :root {
             --primary: #8A2BE2;
             --accent: #00FF7F;
@@ -310,7 +310,7 @@
             background: var(--text-secondary);
         }
 
-        /* Новые стили для разговора */
+        /* Стили для звонка */
         .call-container {
             position: fixed;
             top: 0;
@@ -361,12 +361,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-
-        .call-user-info img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
         }
 
         .call-controls {
@@ -495,10 +489,10 @@
         </div>
         <div class="call-controls">
             <button class="call-btn mute" onclick="toggleMute()">
-                <i class="fas fa-microphone" id="muteIcon">🎤</i>
+                <span id="muteIcon">🎤</span>
             </button>
             <button class="call-btn end" onclick="endCall()">
-                <i class="fas fa-phone-slash">📞</i>
+                <span>📞</span>
             </button>
         </div>
     </div>
@@ -535,6 +529,15 @@
         let callStartTime = null;
         let callTimerInterval = null;
         let ringtone = document.getElementById('ringtone');
+        let isCaller = false;
+
+        // WebRTC конфигурация
+        const configuration = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
 
         // Показать экран регистрации
         function showRegister() {
@@ -557,7 +560,7 @@
             document.getElementById('loginScreen').classList.remove('active');
         }
 
-        // Генерация случайного номера телефона в формате +7XXX-XXX-XXXX
+        // Генерация случайного номера телефона
         function generatePhoneNumber() {
             const prefix = '+7';
             const firstPart = Math.floor(900 + Math.random() * 100).toString();
@@ -579,15 +582,12 @@
                     const user = userCredential.user;
                     userPhoneNumber = generatePhoneNumber();
                     
-                    // Сохраняем данные пользователя в базу
                     return database.ref('users/' + user.uid).set({
                         name: name,
                         email: email,
                         phoneNumber: userPhoneNumber,
                         online: true,
-                        lastSeen: Date.now(),
-                        displayName: name,
-                        photoURL: 'https://via.placeholder.com/40'
+                        lastSeen: Date.now()
                     });
                 })
                 .then(() => {
@@ -629,7 +629,6 @@
                             userPhoneNumber = userData.phoneNumber;
                             document.getElementById('userPhoneNumber').textContent = userPhoneNumber;
                             
-                            // Обновляем статус онлайн
                             database.ref('users/' + currentUser.uid).update({
                                 online: true,
                                 lastSeen: Date.now()
@@ -637,10 +636,7 @@
                         }
                     });
 
-                // Загружаем список пользователей
                 loadUsersList();
-                
-                // Слушаем входящие звонки
                 listenForIncomingCalls();
             }
         }
@@ -693,7 +689,6 @@
                 return;
             }
 
-            // Ищем пользователя с таким номером
             database.ref('users').orderByChild('phoneNumber').equalTo(targetNumber).once('value')
                 .then((snapshot) => {
                     if (snapshot.exists()) {
@@ -706,9 +701,9 @@
                             return;
                         }
 
-                        // Создаем запись о звонке
                         const callId = database.ref('calls').push().key;
                         currentCall = callId;
+                        isCaller = true;
 
                         database.ref('calls/' + callId).set({
                             from: currentUser.uid,
@@ -720,7 +715,6 @@
                             targetName: targetUser.name
                         });
 
-                        // Показываем статус звонка
                         const callStatus = document.getElementById('callStatus');
                         callStatus.style.display = 'block';
                         callStatus.className = 'call-status calling';
@@ -732,31 +726,16 @@
                             </div>
                         `;
 
-                        // Слушаем изменения статуса звонка
+                        // Слушаем WebRTC сигналы
+                        listenForWebRTCSignals(callId);
+
                         database.ref('calls/' + callId).on('value', (callSnapshot) => {
                             const callData = callSnapshot.val();
                             if (callData) {
                                 if (callData.status === 'answered') {
                                     startVideoCall(callId, callData);
-                                } else if (callData.status === 'ended') {
-                                    callStatus.innerHTML = `
-                                        <div>📞 Звонок завершен</div>
-                                        <div style="margin-top: 10px; font-size: 14px; color: var(--text-secondary);">Соединение разорвано</div>
-                                    `;
-                                    setTimeout(() => {
-                                        callStatus.style.display = 'none';
-                                    }, 3000);
-                                    currentCall = null;
-                                } else if (callData.status === 'rejected') {
-                                    callStatus.className = 'call-status';
-                                    callStatus.innerHTML = `
-                                        <div>❌ Звонок отклонен</div>
-                                        <div style="margin-top: 10px; font-size: 14px; color: var(--text-secondary);">Пользователь не ответил</div>
-                                    `;
-                                    setTimeout(() => {
-                                        callStatus.style.display = 'none';
-                                    }, 3000);
-                                    currentCall = null;
+                                } else if (callData.status === 'ended' || callData.status === 'rejected') {
+                                    endCall();
                                 }
                             }
                         });
@@ -767,14 +746,78 @@
                 });
         }
 
+        // Создание PeerConnection
+        function createPeerConnection() {
+            peerConnection = new RTCPeerConnection(configuration);
+            
+            // Добавляем локальный поток
+            if (localStream) {
+                localStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localStream);
+                });
+            }
+            
+            // Получаем удаленный поток
+            peerConnection.ontrack = (event) => {
+                remoteStream = event.streams[0];
+                document.getElementById('remoteVideo').srcObject = remoteStream;
+            };
+            
+            // Обработка ICE кандидатов
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate && currentCall) {
+                    database.ref('calls/' + currentCall + '/iceCandidates').push({
+                        candidate: event.candidate,
+                        from: currentUser.uid
+                    });
+                }
+            };
+            
+            return peerConnection;
+        }
+
+        // Прослушивание WebRTC сигналов
+        function listenForWebRTCSignals(callId) {
+            // Слушаем предложения (offers)
+            database.ref('calls/' + callId + '/offer').on('value', async (snapshot) => {
+                const offer = snapshot.val();
+                if (offer && !isCaller) {
+                    await peerConnection.setRemoteDescription(offer);
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+                    
+                    database.ref('calls/' + callId + '/answer').set(answer);
+                }
+            });
+
+            // Слушаем ответы (answers)
+            database.ref('calls/' + callId + '/answer').on('value', async (snapshot) => {
+                const answer = snapshot.val();
+                if (answer && isCaller) {
+                    await peerConnection.setRemoteDescription(answer);
+                }
+            });
+
+            // Слушаем ICE кандидаты
+            database.ref('calls/' + callId + '/iceCandidates').on('child_added', async (snapshot) => {
+                const candidateData = snapshot.val();
+                if (candidateData && candidateData.from !== currentUser.uid) {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(candidateData.candidate));
+                }
+            });
+        }
+
         // Начать видеозвонок
         async function startVideoCall(callId, callData) {
             try {
-                // Получаем доступ к камере и микрофону
+                // Получаем медиапоток
                 localStream = await navigator.mediaDevices.getUserMedia({
                     video: true,
                     audio: true
                 });
+
+                // Создаем PeerConnection
+                peerConnection = createPeerConnection();
 
                 // Показываем контейнер звонка
                 document.getElementById('callContainer').style.display = 'flex';
@@ -784,13 +827,20 @@
                 document.getElementById('remoteUserName').textContent = callData.targetName || 'Пользователь';
                 document.getElementById('remoteUserAvatar').textContent = callData.targetName ? callData.targetName.charAt(0).toUpperCase() : 'U';
 
+                // Если мы инициатор, создаем предложение
+                if (isCaller) {
+                    const offer = await peerConnection.createOffer();
+                    await peerConnection.setLocalDescription(offer);
+                    database.ref('calls/' + callId + '/offer').set(offer);
+                }
+
                 // Запускаем таймер
                 startCallTimer();
 
                 showNotification('Соединение установлено!');
 
             } catch (error) {
-                console.error('Ошибка доступа к медиаустройствам:', error);
+                console.error('Ошибка видеозвонка:', error);
                 showNotification('Ошибка доступа к камере/микрофону', 'error');
                 endCall();
             }
@@ -844,7 +894,6 @@
 
         // Показать входящий звонок
         function showIncomingCall(callId, callData) {
-            // Воспроизводим рингтон
             ringtone.play().catch(e => console.log('Автовоспроизведение заблокировано'));
 
             const callStatus = document.getElementById('callStatus');
@@ -864,7 +913,6 @@
 
         // Ответить на звонок
         function answerCall(callId) {
-            // Останавливаем рингтон
             ringtone.pause();
             ringtone.currentTime = 0;
 
@@ -872,7 +920,6 @@
                 status: 'answered'
             });
 
-            // Получаем данные о звонке и начинаем видеозвонок
             database.ref('calls/' + callId).once('value').then((snapshot) => {
                 const callData = snapshot.val();
                 startVideoCall(callId, callData);
@@ -883,7 +930,6 @@
 
         // Отклонить звонок
         function rejectCall(callId) {
-            // Останавливаем рингтон
             ringtone.pause();
             ringtone.currentTime = 0;
 
@@ -897,31 +943,38 @@
 
         // Завершить звонок
         function endCall() {
-            // Останавливаем рингтон
             ringtone.pause();
             ringtone.currentTime = 0;
 
-            // Останавливаем медиапотоки
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
             }
 
-            // Скрываем контейнер звонка
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+
             document.getElementById('callContainer').style.display = 'none';
             document.getElementById('callStatus').style.display = 'none';
 
-            // Останавливаем таймер
             stopCallTimer();
 
-            // Обновляем статус звонка в базе
             if (currentCall) {
                 database.ref('calls/' + currentCall).update({
                     status: 'ended'
                 });
+                
+                // Очищаем WebRTC данные
+                database.ref('calls/' + currentCall + '/offer').remove();
+                database.ref('calls/' + currentCall + '/answer').remove();
+                database.ref('calls/' + currentCall + '/iceCandidates').remove();
+                
                 currentCall = null;
             }
 
+            isCaller = false;
             showNotification('Звонок завершен');
         }
 
@@ -943,7 +996,6 @@
 
         // Уведомления
         function showNotification(message, type = 'info') {
-            // Создаем простое уведомление
             const notification = document.createElement('div');
             notification.style.cssText = `
                 position: fixed;
